@@ -1,4 +1,4 @@
-# 💰 SalaryWise – Salary-Based Investment Planner
+# 💰 SalaryWise – Salary-Based Investment Planner!!
 
 > **Disclaimer:** SalaryWise is an educational tool. All recommendations are for informational purposes only and do not constitute professional financial advice. Always consult a SEBI-registered financial advisor before investing.
 
