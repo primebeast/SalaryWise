@@ -1,0 +1,84 @@
+@model SalaryWise.Models.UserProfile
+@{ViewData["Title"] = "My Profile";}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="sw-page-title">My Profile</h1>
+                <p class="sw-page-sub">Your personal and financial details</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" class="btn sw-btn-primary rounded-pill px-4">
+                    <i class="bi bi-pencil me-2"></i>Edit Profile
+                </a>
+                <a asp-controller="Account" asp-action="ChangePassword" class="btn sw-btn-outline rounded-pill px-4">
+                    <i class="bi bi-lock me-2"></i>Change Password
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    @if (Model == null)
+    {
+        <div class="sw-empty-state text-center py-5">
+            <div class="sw-empty-icon">👤</div>
+            <h3 class="mt-3">Profile Incomplete</h3>
+            <p class="opacity-60">Complete your profile to unlock personalized plan pre-filling.</p>
+            <a asp-action="Edit" class="btn sw-btn-primary rounded-pill px-5">Complete Profile</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="sw-card text-center">
+                    <div class="sw-card-body py-4">
+                        <div class="sw-profile-avatar">@Model.FullName[0].ToString().ToUpper()</div>
+                        <h4 class="mt-3 fw-700">@Model.FullName</h4>
+                        <p class="opacity-60">@Model.Occupation &bull; @Model.City</p>
+                        <div class="d-flex justify-content-center gap-3 mt-3">
+                            <div class="text-center">
+                                <div class="fw-700 text-primary">@Model.Age</div>
+                                <div class="small opacity-60">Age</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="fw-700 text-success">@Model.PreferredInvestmentPercentage%</div>
+                                <div class="small opacity-60">Target Rate</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="fw-700" style="color:#ec4899">@Model.RiskPreference</div>
+                                <div class="small opacity-60">Risk Level</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="sw-card">
+                    <div class="sw-card-header"><h5 class="sw-card-title">Financial Details</h5></div>
+                    <div class="sw-card-body">
+                        <dl class="sw-dl">
+                            <dt>Monthly Salary</dt><dd class="fw-600 text-primary">₹@Model.MonthlySalary.ToString("N0")</dd>
+                            <dt>Monthly Expenses</dt><dd>₹@Model.MonthlyExpenses.ToString("N0")</dd>
+                            <dt>Existing Savings</dt><dd>₹@Model.ExistingSavings.ToString("N0")</dd>
+                            <dt>Primary Goal</dt><dd>@Model.PrimaryGoal</dd>
+                            <dt>Investment Horizon</dt><dd>@Model.InvestmentHorizon</dd>
+                            <dt>Employment</dt><dd>@Model.EmploymentType</dd>
+                            @if (!string.IsNullOrEmpty(Model.MobileNumber))
+                            {
+                                <dt>Mobile</dt><dd>@Model.MobileNumber</dd>
+                            }
+                            @if (Model.DateOfBirth.HasValue)
+                            {
+                                <dt>Date of Birth</dt><dd>@Model.DateOfBirth.Value.ToString("dd MMM yyyy")</dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

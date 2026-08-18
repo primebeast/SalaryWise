@@ -1,0 +1,237 @@
+@model SalaryWise.ViewModels.PlanDetailsViewModel
+@using SalaryWise.Models
+@{
+    ViewData["Title"] = Model.Plan.PlanName;
+    var plan   = Model.Plan;
+    var rec    = Model.Recommendation;
+    var health = Model.HealthScore;
+    var afford = Model.Affordability;
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1 class="sw-page-title mb-1">@plan.PlanName</h1>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <span class="sw-badge-status @(plan.Status == PlanStatus.Active ? "sw-badge-active" : "sw-badge-archived")">
+                        @plan.Status
+                    </span>
+                    <span class="opacity-50 small">Created @plan.CreatedAt.ToString("dd MMM yyyy")</span>
+                </div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                @if (plan.Status != PlanStatus.Active)
+                {
+                    <form asp-action="SetActive" asp-route-id="@plan.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button class="btn sw-btn-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-check2-circle me-1"></i>Set Active
+                        </button>
+                    </form>
+                }
+                <a asp-action="Edit" asp-route-id="@plan.Id" class="btn sw-btn-outline btn-sm rounded-pill px-3">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                </a>
+                <a asp-action="Simulator" asp-route-id="@plan.Id" class="btn sw-btn-outline btn-sm rounded-pill px-3">
+                    <i class="bi bi-sliders me-1"></i>Simulator
+                </a>
+                <form asp-action="Delete" asp-route-id="@plan.Id" method="post"
+                      onsubmit="return confirm('Delete this plan?')">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- Affordability Warning -->
+    @if (!string.IsNullOrEmpty(plan.AffordabilityWarning))
+    {
+        <div class="alert @(plan.IsAffordable ? "sw-alert-info" : "sw-alert-warning") mb-4">
+            @plan.AffordabilityWarning
+            @if (!string.IsNullOrEmpty(plan.SuggestedRange))
+            {
+                <span> Suggested range: <strong>@plan.SuggestedRange</strong></span>
+            }
+        </div>
+    }
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6"><div class="sw-kpi-card sw-kpi-purple">
+            <div class="sw-kpi-icon"><i class="bi bi-currency-rupee"></i></div>
+            <div class="sw-kpi-value">₹@plan.MonthlySalary.ToString("N0")</div>
+            <div class="sw-kpi-label">Monthly Salary</div>
+        </div></div>
+        <div class="col-md-3 col-6"><div class="sw-kpi-card sw-kpi-blue">
+            <div class="sw-kpi-icon"><i class="bi bi-wallet2"></i></div>
+            <div class="sw-kpi-value">₹@plan.DisposableIncome.ToString("N0")</div>
+            <div class="sw-kpi-label">Disposable Income</div>
+        </div></div>
+        <div class="col-md-3 col-6"><div class="sw-kpi-card sw-kpi-green">
+            <div class="sw-kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="sw-kpi-value">₹@plan.MonthlyInvestmentAmount.ToString("N0")</div>
+            <div class="sw-kpi-label">Monthly Investment (@plan.InvestmentPercentage%)</div>
+        </div></div>
+        <div class="col-md-3 col-6"><div class="sw-kpi-card sw-kpi-orange">
+            <div class="sw-kpi-icon"><i class="bi bi-heart-pulse"></i></div>
+            <div class="sw-kpi-value">@health.TotalScore<small class="fs-6">/100</small></div>
+            <div class="sw-kpi-label">Health Score (@health.Grade)</div>
+        </div></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="sw-card h-100">
+                <div class="sw-card-header">
+                    <h5 class="sw-card-title"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Allocation Breakdown</h5>
+                </div>
+                <div class="sw-card-body d-flex justify-content-center align-items-center">
+                    <canvas id="allocChart" style="max-height:270px"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="sw-card h-100">
+                <div class="sw-card-header">
+                    <h5 class="sw-card-title"><i class="bi bi-graph-up me-2 text-success"></i>20-Year Growth Projection</h5>
+                </div>
+                <div class="sw-card-body">
+                    <canvas id="lineChart" style="max-height:270px"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projections table -->
+    <div class="sw-card mb-4">
+        <div class="sw-card-header">
+            <h5 class="sw-card-title"><i class="bi bi-calendar3 me-2 text-warning"></i>Wealth Projections</h5>
+        </div>
+        <div class="sw-card-body p-0">
+            <div class="table-responsive">
+                <table class="table sw-table mb-0">
+                    <thead><tr>
+                        <th>Horizon</th><th>Total Invested</th><th>Est. Value</th>
+                        <th>Gains</th><th>Blended CAGR</th><th>Inflation-Adj.</th>
+                    </tr></thead>
+                    <tbody>
+                        @foreach (var p in Model.Projections)
+                        {
+                            <tr>
+                                <td><span class="fw-600">@p.Years Years</span></td>
+                                <td>₹@p.TotalInvested.ToString("N0")</td>
+                                <td class="fw-600 text-primary">₹@p.EstimatedValue.ToString("N0")</td>
+                                <td class="text-success">+₹@p.EstimatedGains.ToString("N0")</td>
+                                <td><span class="sw-badge-cagr">@p.BlendedCAGR.ToString("F1")%</span></td>
+                                <td class="opacity-70">₹@p.InflationAdjustedValue.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="sw-card mb-4">
+        <div class="sw-card-header">
+            <h5 class="sw-card-title"><i class="bi bi-list-check me-2 text-info"></i>Instrument-by-Instrument Recommendations</h5>
+            <div class="d-flex gap-3 small opacity-70">
+                <span><span class="sw-dot sw-dot-safe"></span> Safe: ₹@rec.SafeTotal.ToString("N0")</span>
+                <span><span class="sw-dot sw-dot-medium"></span> Medium: ₹@rec.MediumTotal.ToString("N0")</span>
+            </div>
+        </div>
+        <div class="sw-card-body p-0">
+            @foreach (var alloc in rec.Allocations)
+            {
+                <div class="sw-recommendation-item">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="mb-0 fw-700">@alloc.Name</h6>
+                                <span class="sw-badge-category @(alloc.Category == InvestmentCategory.Safe ? "sw-badge-safe" : "sw-badge-medium")">
+                                    @alloc.Category
+                                </span>
+                            </div>
+                            <p class="small opacity-75 mb-2">@alloc.Reason</p>
+                            <div class="d-flex flex-wrap gap-3 small opacity-60">
+                                <span><i class="bi bi-arrow-up-right-circle me-1"></i>@alloc.ExpectedAnnualReturn%/yr</span>
+                                <span><i class="bi bi-droplet me-1"></i>@alloc.Liquidity</span>
+                                <span><i class="bi bi-clock me-1"></i>@alloc.SuggestedHorizon</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="sw-alloc-amount">₹@alloc.MonthlyAmount.ToString("N0")</div>
+                            <div class="small opacity-60">@alloc.Percentage%</div>
+                        </div>
+                    </div>
+                    <div class="progress sw-progress mt-2">
+                        <div class="progress-bar @(alloc.Category == InvestmentCategory.Safe ? "sw-pb-blue" : "sw-pb-purple")"
+                             style="width:@alloc.Percentage%"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Health Tips -->
+    @if (health.Tips.Any())
+    {
+        <div class="sw-card mb-4">
+            <div class="sw-card-header">
+                <h5 class="sw-card-title"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Financial Health Tips</h5>
+            </div>
+            <div class="sw-card-body">
+                <ul class="list-unstyled mb-0">
+                    @foreach (var tip in health.Tips)
+                    {
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>@tip</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    const labels  = @Html.Raw(Model.AllocationLabelsJson);
+    const amounts = @Html.Raw(Model.AllocationAmountsJson);
+    const colors  = @Html.Raw(Model.AllocationColorsJson);
+    const gLabels = @Html.Raw(Model.GrowthLabelsJson);
+    const gVals   = @Html.Raw(Model.GrowthValuesJson);
+    const iVals   = @Html.Raw(Model.InvestedValuesJson);
+
+    new Chart(document.getElementById('allocChart'), {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: amounts, backgroundColor: colors, borderColor: '#0f172a', borderWidth: 2, hoverOffset: 8 }] },
+        options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 10, boxWidth: 14 } } } }
+    });
+
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: gLabels,
+            datasets: [
+                { label: 'Portfolio Value', data: gVals, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.4, pointRadius: 2 },
+                { label: 'Amount Invested', data: iVals, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', fill: true, tension: 0, borderDash: [5,5], pointRadius: 0 }
+            ]
+        },
+        options: {
+            scales: {
+                x: { ticks: { color: '#64748b', maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                y: { ticks: { color: '#64748b', callback: v => '₹' + (v >= 10000000 ? (v/10000000).toFixed(1)+'Cr' : (v/100000).toFixed(0)+'L') }, grid: { color: 'rgba(255,255,255,0.04)' } }
+            },
+            plugins: { legend: { labels: { color: '#94a3b8' } } }
+        }
+    });
+</script>
+}

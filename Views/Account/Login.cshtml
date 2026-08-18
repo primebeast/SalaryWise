@@ -1,0 +1,62 @@
+@model SalaryWise.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="sw-auth-page">
+    <div class="sw-auth-card">
+        <div class="text-center mb-4">
+            <div class="sw-auth-logo">💰</div>
+            <h1 class="sw-auth-title">Welcome Back</h1>
+            <p class="sw-auth-sub">Login to your SalaryWise account</p>
+        </div>
+
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert sw-alert-error mb-3"></div>
+
+            <div class="sw-form-group">
+                <label asp-for="Email" class="sw-label"></label>
+                <div class="sw-input-wrap">
+                    <i class="bi bi-envelope sw-input-icon"></i>
+                    <input asp-for="Email" class="sw-input" placeholder="you@example.com" />
+                </div>
+                <span asp-validation-for="Email" class="sw-validation"></span>
+            </div>
+
+            <div class="sw-form-group">
+                <label asp-for="Password" class="sw-label"></label>
+                <div class="sw-input-wrap">
+                    <i class="bi bi-lock sw-input-icon"></i>
+                    <input asp-for="Password" class="sw-input" placeholder="Your password" />
+                </div>
+                <span asp-validation-for="Password" class="sw-validation"></span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label sw-auth-footer">Remember me</label>
+                </div>
+                <a asp-action="ForgotPassword" class="sw-link small">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn sw-btn-primary w-100 rounded-pill">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </button>
+        </form>
+
+        <div class="sw-demo-box mt-3">
+            <small class="opacity-60">Demo: <strong>demo@salarywise.in</strong> / <strong>Demo@123</strong></small>
+        </div>
+
+        <hr class="sw-divider" />
+        <p class="text-center sw-auth-footer">
+            New to SalaryWise?
+            <a asp-action="Register" class="sw-link fw-600">Create account</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

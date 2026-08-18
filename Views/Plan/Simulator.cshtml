@@ -1,0 +1,250 @@
+@model SalaryWise.ViewModels.PlanDetailsViewModel
+@{
+    ViewData["Title"] = "What-If Simulator";
+    var plan = Model.Plan;
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <h1 class="sw-page-title">What-If Simulator</h1>
+        <p class="sw-page-sub">Adjust inputs and instantly see how your portfolio changes</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        <!-- Controls Panel -->
+        <div class="col-lg-4">
+            <div class="sw-card sticky-top" style="top:80px">
+                <div class="sw-card-header">
+                    <h5 class="sw-card-title"><i class="bi bi-sliders me-2"></i>Adjust Parameters</h5>
+                </div>
+                <div class="sw-card-body">
+
+                    <div class="sw-form-group">
+                        <label class="sw-label">Investment % of Salary</label>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small opacity-60">1%</span>
+                            <span class="fw-700 text-primary"><span id="simPct">@plan.InvestmentPercentage</span>% = ₹<span id="simAmt">@plan.MonthlyInvestmentAmount.ToString("N0")</span></span>
+                            <span class="small opacity-60">50%</span>
+                        </div>
+                        <input type="range" id="simSlider" class="sw-slider" min="1" max="50" value="@plan.InvestmentPercentage" />
+                    </div>
+
+                    <div class="sw-form-group">
+                        <label class="sw-label">Risk Tolerance</label>
+                        <select id="simRisk" class="sw-select">
+                        @if (plan.RiskTolerance == SalaryWise.Models.RiskTolerance.Safe) { <option value="Safe" selected>Safe</option> } else { <option value="Safe">Safe</option> }
+                            @if (plan.RiskTolerance == SalaryWise.Models.RiskTolerance.Medium) { <option value="Medium" selected>Medium</option> } else { <option value="Medium">Medium</option> }
+                        </select>
+                    </div>
+
+                    <div class="sw-form-group">
+                        <label class="sw-label">Investment Horizon</label>
+                        <select id="simHorizon" class="sw-select">
+                            <option value="ShortTerm">Short Term (&lt; 3 yrs)</option>
+                            <option value="MediumTerm" selected>Medium Term (3–7 yrs)</option>
+                            <option value="LongTerm">Long Term (&gt; 7 yrs)</option>
+                        </select>
+                    </div>
+
+                    <hr class="sw-divider" />
+                    <h6 class="sw-section-label mb-3">Salary Increase Simulator</h6>
+                    <div class="d-flex gap-2">
+                        <button class="btn sw-btn-outline btn-sm rounded-pill" onclick="applySalaryIncrease(5)">+5%</button>
+                        <button class="btn sw-btn-outline btn-sm rounded-pill" onclick="applySalaryIncrease(10)">+10%</button>
+                        <button class="btn sw-btn-outline btn-sm rounded-pill" onclick="applySalaryIncrease(20)">+20%</button>
+                        <button class="btn sw-btn-outline btn-sm rounded-pill" onclick="resetSalary()">Reset</button>
+                    </div>
+                    <div id="salaryLabel" class="mt-2 small opacity-70">Current Salary: ₹@plan.MonthlySalary.ToString("N0")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <div id="simLoading" class="d-none text-center py-4">
+                <div class="spinner-border text-primary"></div>
+                <div class="mt-2 opacity-60">Recalculating...</div>
+            </div>
+
+            <!-- Affordability Alert -->
+            <div id="simAffordAlert" class="d-none mb-3"></div>
+
+            <!-- KPIs -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4"><div class="sw-kpi-card sw-kpi-green">
+                    <div class="sw-kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="sw-kpi-value" id="simInvestAmt">₹@plan.MonthlyInvestmentAmount.ToString("N0")</div>
+                    <div class="sw-kpi-label">Monthly Investment</div>
+                </div></div>
+                <div class="col-md-4"><div class="sw-kpi-card sw-kpi-purple">
+                    <div class="sw-kpi-icon"><i class="bi bi-heart-pulse"></i></div>
+                    <div class="sw-kpi-value" id="simHealth">@plan.HealthScore<span class="fs-6">/100</span></div>
+                    <div class="sw-kpi-label">Health Score</div>
+                </div></div>
+                <div class="col-md-4"><div class="sw-kpi-card sw-kpi-blue">
+                    <div class="sw-kpi-icon"><i class="bi bi-calendar3"></i></div>
+                    <div class="sw-kpi-value" id="sim20yr">—</div>
+                    <div class="sw-kpi-label">20yr Projection</div>
+                </div></div>
+            </div>
+
+            <!-- Allocation Chart -->
+            <div class="sw-card mb-4">
+                <div class="sw-card-header">
+                    <h5 class="sw-card-title"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Live Allocation</h5>
+                </div>
+                <div class="sw-card-body d-flex justify-content-center">
+                    <canvas id="simAllocChart" style="max-height:250px"></canvas>
+                </div>
+            </div>
+
+            <!-- Allocations List -->
+            <div class="sw-card mb-4">
+                <div class="sw-card-header"><h5 class="sw-card-title">Instrument Breakdown</h5></div>
+                <div id="simAllocList" class="sw-card-body p-0"></div>
+            </div>
+
+            <!-- Projection Summary -->
+            <div class="sw-card">
+                <div class="sw-card-header"><h5 class="sw-card-title"><i class="bi bi-calendar3 me-2 text-warning"></i>Projections</h5></div>
+                <div id="simProjections" class="sw-card-body"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const BASE_SALARY   = @plan.MonthlySalary;
+    const BASE_EXPENSES = @plan.MonthlyExpenses;
+    const BASE_SAVINGS  = @plan.ExistingSavings;
+    const BASE_AGE      = @plan.Age;
+    const BASE_GOAL     = '@plan.FinancialGoal';
+
+    let currentSalary = BASE_SALARY;
+    let simChart = null;
+
+    const colors = ['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981',
+                    '#3b82f6','#ef4444','#14b8a6','#f97316','#84cc16'];
+
+    async function runSim() {
+        const pct     = parseInt(document.getElementById('simSlider').value);
+        const risk    = document.getElementById('simRisk').value;
+        const horizon = document.getElementById('simHorizon').value;
+
+        document.getElementById('simLoading').classList.remove('d-none');
+
+        try {
+            const res = await fetch('/Plan/Simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ salary: currentSalary, expenses: BASE_EXPENSES,
+                    existingSavings: BASE_SAVINGS, age: BASE_AGE,
+                    percent: pct, risk, horizon, goal: BASE_GOAL })
+            });
+            const data = await res.json();
+
+            // Update KPIs
+            document.getElementById('simInvestAmt').textContent = '₹' + Math.round(data.investmentAmount).toLocaleString('en-IN');
+            document.getElementById('simHealth').innerHTML = data.healthScore + '<span class="fs-6">/100</span>';
+            const p20 = data.projections.find(p => p.years === 20);
+            if (p20) document.getElementById('sim20yr').textContent = '₹' + Math.round(p20.estimatedValue).toLocaleString('en-IN');
+
+            // Affordability
+            const alert = document.getElementById('simAffordAlert');
+            if (data.warning) {
+                alert.className = 'alert sw-alert-warning mb-3';
+                alert.textContent = data.warning;
+                alert.classList.remove('d-none');
+            } else { alert.classList.add('d-none'); }
+
+            // Allocation chart
+            const chartLabels = data.allocations.map(a => a.name);
+            const chartData   = data.allocations.map(a => a.amount);
+            if (simChart) {
+                simChart.data.labels = chartLabels;
+                simChart.data.datasets[0].data = chartData;
+                simChart.update();
+            } else {
+                simChart = new Chart(document.getElementById('simAllocChart'), {
+                    type: 'doughnut',
+                    data: { labels: chartLabels, datasets: [{ data: chartData,
+                        backgroundColor: colors.slice(0, chartLabels.length),
+                        borderColor: '#0f172a', borderWidth: 2, hoverOffset: 6 }] },
+                    options: { cutout: '65%', plugins: { legend: { position: 'bottom',
+                        labels: { color: '#94a3b8', font: { size: 11 }, padding: 10, boxWidth: 14 } } } }
+                });
+            }
+
+            // Allocation list
+            let listHtml = '';
+            for (const a of data.allocations) {
+                listHtml += `<div class="sw-recommendation-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-600">${a.name}</span>
+                            <span class="sw-badge-category ms-2 ${a.category === 'Safe' ? 'sw-badge-safe' : 'sw-badge-medium'}">${a.category}</span>
+                        </div>
+                        <div class="text-end">
+                            <div class="sw-alloc-amount">₹${Math.round(a.amount).toLocaleString('en-IN')}</div>
+                            <div class="small opacity-60">${a.pct}%</div>
+                        </div>
+                    </div>
+                    <div class="progress sw-progress mt-2">
+                        <div class="progress-bar sw-pb-purple" style="width:${a.pct}%"></div>
+                    </div>
+                </div>`;
+            }
+            document.getElementById('simAllocList').innerHTML = listHtml;
+
+            // Projections
+            let projHtml = '<div class="row g-3">';
+            for (const p of data.projections) {
+                projHtml += `<div class="col-md-4"><div class="sw-projection-card">
+                    <div class="sw-proj-year">${p.years} Years</div>
+                    <div class="sw-proj-value">₹${Math.round(p.estimatedValue).toLocaleString('en-IN')}</div>
+                    <div class="sw-proj-gain text-success">+₹${Math.round(p.estimatedGains).toLocaleString('en-IN')}</div>
+                    <div class="sw-proj-inflation">Inflation-adj: ₹${Math.round(p.inflationAdjustedValue).toLocaleString('en-IN')}</div>
+                </div></div>`;
+            }
+            projHtml += '</div>';
+            document.getElementById('simProjections').innerHTML = projHtml;
+        } finally {
+            document.getElementById('simLoading').classList.add('d-none');
+        }
+    }
+
+    function applySalaryIncrease(pct) {
+        currentSalary = Math.round(BASE_SALARY * (1 + pct / 100));
+        document.getElementById('salaryLabel').textContent = `Simulated Salary (+${pct}%): ₹${currentSalary.toLocaleString('en-IN')}`;
+        updatePctDisplay();
+        runSim();
+    }
+    function resetSalary() {
+        currentSalary = BASE_SALARY;
+        document.getElementById('salaryLabel').textContent = `Current Salary: ₹${BASE_SALARY.toLocaleString('en-IN')}`;
+        updatePctDisplay();
+        runSim();
+    }
+    function updatePctDisplay() {
+        const pct = parseInt(document.getElementById('simSlider').value);
+        document.getElementById('simPct').textContent = pct;
+        document.getElementById('simAmt').textContent = Math.round(currentSalary * pct / 100).toLocaleString('en-IN');
+    }
+
+    document.getElementById('simSlider').addEventListener('input', function() {
+        updatePctDisplay();
+        debounceRun();
+    });
+    document.getElementById('simRisk').addEventListener('change', runSim);
+    document.getElementById('simHorizon').addEventListener('change', runSim);
+
+    let debounceTimer;
+    function debounceRun() { clearTimeout(debounceTimer); debounceTimer = setTimeout(runSim, 500); }
+
+    // Initial run
+    runSim();
+</script>
+}

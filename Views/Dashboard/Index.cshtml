@@ -1,0 +1,272 @@
+@model SalaryWise.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="sw-page-title mb-0">
+                    Welcome back, <span class="text-gradient">@Model.UserName</span> 👋
+                </h1>
+                <p class="sw-page-sub mb-0">Here's your financial snapshot</p>
+            </div>
+            <a asp-controller="Plan" asp-action="Create" class="btn sw-btn-primary rounded-pill px-4">
+                <i class="bi bi-plus-circle-fill me-2"></i>New Plan
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    @if (!Model.HasProfile)
+    {
+        <div class="alert sw-alert-info mb-4">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            Complete your <a asp-controller="Profile" asp-action="Edit" class="sw-link fw-600">profile</a> to get personalised recommendations pre-filled in your plan.
+        </div>
+    }
+
+    @if (!Model.HasActivePlan)
+    {
+        <div class="sw-empty-state text-center py-5">
+            <div class="sw-empty-icon">📊</div>
+            <h3 class="mt-3">No investment plan yet</h3>
+            <p class="opacity-60">Create your first plan to see your personalized portfolio recommendations and wealth projections.</p>
+            <a asp-controller="Plan" asp-action="Create" class="btn sw-btn-primary rounded-pill px-5 mt-2">
+                <i class="bi bi-rocket-takeoff-fill me-2"></i>Create My First Plan
+            </a>
+        </div>
+    }
+    else
+    {
+        var plan   = Model.ActivePlan!;
+        var health = Model.HealthScore!;
+        var rec    = Model.Recommendation!;
+
+        <!-- KPI Cards Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="sw-kpi-card sw-kpi-purple">
+                    <div class="sw-kpi-icon"><i class="bi bi-currency-rupee"></i></div>
+                    <div class="sw-kpi-value">₹@plan.MonthlySalary.ToString("N0")</div>
+                    <div class="sw-kpi-label">Monthly Salary</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="sw-kpi-card sw-kpi-green">
+                    <div class="sw-kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="sw-kpi-value">₹@plan.MonthlyInvestmentAmount.ToString("N0")</div>
+                    <div class="sw-kpi-label">Monthly Investment</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="sw-kpi-card sw-kpi-blue">
+                    <div class="sw-kpi-icon"><i class="bi bi-shield-check"></i></div>
+                    <div class="sw-kpi-value">₹@plan.EmergencyFundTarget.ToString("N0")</div>
+                    <div class="sw-kpi-label">Emergency Target</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="sw-kpi-card sw-kpi-orange">
+                    <div class="sw-kpi-icon"><i class="bi bi-heart-pulse"></i></div>
+                    <div class="sw-kpi-value">@health.TotalScore<small class="fs-6">/100</small></div>
+                    <div class="sw-kpi-label">Health Score (@health.Grade)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <div class="sw-card h-100">
+                    <div class="sw-card-header">
+                        <h5 class="sw-card-title"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Portfolio Allocation</h5>
+                    </div>
+                    <div class="sw-card-body d-flex justify-content-center align-items-center" style="min-height:280px">
+                        <canvas id="allocationChart" style="max-height:270px"></canvas>
+                    </div>
+                    <div class="sw-card-footer d-flex justify-content-around">
+                        <div class="text-center">
+                            <div class="fw-700 text-primary">₹@rec.SafeTotal.ToString("N0")</div>
+                            <div class="small opacity-60">Safe (@rec.SafePercent.ToString("F0")%)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="fw-700" style="color:#ec4899">₹@rec.MediumTotal.ToString("N0")</div>
+                            <div class="small opacity-60">Medium (@rec.MediumPercent.ToString("F0")%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="sw-card h-100">
+                    <div class="sw-card-header">
+                        <h5 class="sw-card-title"><i class="bi bi-graph-up me-2 text-success"></i>Projected Wealth Growth (20 Years)</h5>
+                    </div>
+                    <div class="sw-card-body" style="min-height:280px">
+                        <canvas id="growthChart" style="max-height:270px"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Score + Projections Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <div class="sw-card h-100">
+                    <div class="sw-card-header">
+                        <h5 class="sw-card-title"><i class="bi bi-heart-pulse me-2 text-danger"></i>Financial Health</h5>
+                    </div>
+                    <div class="sw-card-body">
+                        <div class="text-center mb-3">
+                            <div class="sw-health-ring" style="--score:@health.TotalScore">
+                                <svg viewBox="0 0 120 120" class="sw-health-svg">
+                                    <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="12"/>
+                                    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#healthGrad)" stroke-width="12"
+                                        stroke-dasharray="314" stroke-dashoffset="@((int)(314 * (1 - health.TotalScore / 100.0)))"
+                                        stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                                    <defs>
+                                        <linearGradient id="healthGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#6366f1"/>
+                                            <stop offset="100%" stop-color="#10b981"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <div class="sw-health-center">
+                                    <div class="sw-health-num">@health.TotalScore</div>
+                                    <div class="sw-health-grade">@health.Grade</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sw-score-bars">
+                            <div class="sw-score-bar-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>Savings Rate</small><small class="fw-600">@health.SavingsRateScore/25</small>
+                                </div>
+                                <div class="progress sw-progress"><div class="progress-bar sw-pb-purple" style="width:@(health.SavingsRateScore * 4)%"></div></div>
+                            </div>
+                            <div class="sw-score-bar-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>Emergency Fund</small><small class="fw-600">@health.EmergencyFundScore/25</small>
+                                </div>
+                                <div class="progress sw-progress"><div class="progress-bar sw-pb-blue" style="width:@(health.EmergencyFundScore * 4)%"></div></div>
+                            </div>
+                            <div class="sw-score-bar-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>Expense Ratio</small><small class="fw-600">@health.ExpenseRatioScore/20</small>
+                                </div>
+                                <div class="progress sw-progress"><div class="progress-bar sw-pb-green" style="width:@(health.ExpenseRatioScore * 5)%"></div></div>
+                            </div>
+                            <div class="sw-score-bar-item">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>Diversification</small><small class="fw-600">@health.DiversificationScore/15</small>
+                                </div>
+                                <div class="progress sw-progress"><div class="progress-bar sw-pb-orange" style="width:@(health.DiversificationScore * 100 / 15)%"></div></div>
+                            </div>
+                        </div>
+                        <p class="small mt-3 opacity-75">@health.Summary</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projections -->
+            <div class="col-lg-8">
+                <div class="sw-card h-100">
+                    <div class="sw-card-header">
+                        <h5 class="sw-card-title"><i class="bi bi-calendar3 me-2 text-warning"></i>Wealth Projections</h5>
+                    </div>
+                    <div class="sw-card-body">
+                        <div class="row g-3">
+                            @foreach (var proj in Model.Projections)
+                            {
+                                <div class="col-md-4">
+                                    <div class="sw-projection-card">
+                                        <div class="sw-proj-year">@proj.Years Year@(proj.Years > 1 ? "s" : "")</div>
+                                        <div class="sw-proj-value">₹@proj.EstimatedValue.ToString("N0")</div>
+                                        <div class="sw-proj-invested">Invested: ₹@proj.TotalInvested.ToString("N0")</div>
+                                        <div class="sw-proj-gain text-success">+₹@proj.EstimatedGains.ToString("N0")</div>
+                                        <div class="sw-proj-cagr">CAGR @proj.BlendedCAGR.ToString("F1")%</div>
+                                        <div class="mt-2">
+                                            <div class="progress sw-progress">
+                                                @{
+                                                    var gainPct = proj.EstimatedValue > 0 ? (int)(proj.EstimatedGains / proj.EstimatedValue * 100) : 0;
+                                                }
+                                                <div class="progress-bar sw-pb-purple" style="width:@(100 - gainPct)%" title="Invested"></div>
+                                                <div class="progress-bar sw-pb-green" style="width:@gainPct%" title="Gains"></div>
+                                            </div>
+                                        </div>
+                                        <div class="sw-proj-inflation">Inflation-adj: ₹@proj.InflationAdjustedValue.ToString("N0")</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Links -->
+        <div class="d-flex flex-wrap gap-3 mt-2">
+            <a asp-controller="Plan" asp-action="Details" asp-route-id="@plan.Id" class="btn sw-btn-outline rounded-pill px-4">
+                <i class="bi bi-eye me-2"></i>View Full Plan
+            </a>
+            <a asp-controller="Plan" asp-action="Simulator" asp-route-id="@plan.Id" class="btn sw-btn-outline rounded-pill px-4">
+                <i class="bi bi-sliders me-2"></i>What-If Simulator
+            </a>
+            <a asp-controller="Plan" asp-action="History" class="btn sw-btn-outline rounded-pill px-4">
+                <i class="bi bi-clock-history me-2"></i>All Plans
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    const allocLabels  = @Html.Raw(Model.AllocationLabelsJson);
+    const allocAmounts = @Html.Raw(Model.AllocationAmountsJson);
+    const growthLabels = @Html.Raw(Model.GrowthLabelsJson);
+    const growthValues = @Html.Raw(Model.GrowthValuesJson);
+    const investValues = @Html.Raw(Model.InvestedValuesJson);
+
+    if (document.getElementById('allocationChart') && allocLabels.length) {
+        const colors = ['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981',
+                        '#3b82f6','#ef4444','#14b8a6','#f97316','#84cc16',
+                        '#06b6d4','#a855f7','#e11d48','#16a34a','#d97706'];
+        new Chart(document.getElementById('allocationChart'), {
+            type: 'doughnut',
+            data: {
+                labels: allocLabels,
+                datasets: [{ data: allocAmounts, backgroundColor: colors.slice(0, allocLabels.length),
+                    borderColor: '#0f172a', borderWidth: 2, hoverOffset: 8 }]
+            },
+            options: {
+                cutout: '68%', plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 12, boxWidth: 14 } }
+                }
+            }
+        });
+    }
+
+    if (document.getElementById('growthChart') && growthLabels.length) {
+        new Chart(document.getElementById('growthChart'), {
+            type: 'line',
+            data: {
+                labels: growthLabels,
+                datasets: [
+                    { label: 'Portfolio Value', data: growthValues, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.4, pointRadius: 2 },
+                    { label: 'Amount Invested', data: investValues, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', fill: true, tension: 0.4, borderDash: [5,5], pointRadius: 0 }
+                ]
+            },
+            options: {
+                scales: {
+                    x: { ticks: { color: '#64748b', maxTicksLimit: 10 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                    y: { ticks: { color: '#64748b', callback: v => '₹' + (v/100000).toFixed(0) + 'L' }, grid: { color: 'rgba(255,255,255,0.04)' } }
+                },
+                plugins: { legend: { labels: { color: '#94a3b8' } } }
+            }
+        });
+    }
+</script>
+}

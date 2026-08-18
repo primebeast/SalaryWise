@@ -1,0 +1,190 @@
+@model SalaryWise.ViewModels.PlanInputViewModel
+@{
+    ViewData["Title"] = Model.PlanId.HasValue ? "Edit Plan" : "Create New Plan";
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <h1 class="sw-page-title">@ViewData["Title"]</h1>
+        <p class="sw-page-sub">Fill in your financial details to generate a personalized investment plan</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="sw-card">
+                <div class="sw-card-body p-4">
+                    <form asp-action="@(Model.PlanId.HasValue ? "Edit" : "Create")"
+                          asp-route-id="@Model.PlanId" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert sw-alert-error mb-4"></div>
+
+                        <!-- Plan Name -->
+                        <div class="sw-form-group">
+                            <label asp-for="PlanName" class="sw-label"></label>
+                            <div class="sw-input-wrap">
+                                <i class="bi bi-pencil sw-input-icon"></i>
+                                <input asp-for="PlanName" class="sw-input" />
+                            </div>
+                            <span asp-validation-for="PlanName" class="sw-validation"></span>
+                        </div>
+
+                        <hr class="sw-divider my-4" />
+                        <h5 class="sw-section-label mb-3"><i class="bi bi-person-fill me-2"></i>Personal Details</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="Age" class="sw-label"></label>
+                                    <div class="sw-input-wrap">
+                                        <i class="bi bi-calendar3 sw-input-icon"></i>
+                                        <input asp-for="Age" class="sw-input" type="number" min="18" max="80" />
+                                    </div>
+                                    <span asp-validation-for="Age" class="sw-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="EmploymentType" class="sw-label"></label>
+                                    <select asp-for="EmploymentType" class="sw-select"
+                                            asp-items="Html.GetEnumSelectList<SalaryWise.Models.EmploymentType>()"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="sw-divider my-4" />
+                        <h5 class="sw-section-label mb-3"><i class="bi bi-currency-rupee me-2"></i>Financial Details</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="MonthlySalary" class="sw-label"></label>
+                                    <div class="sw-input-wrap">
+                                        <i class="bi bi-currency-rupee sw-input-icon"></i>
+                                        <input asp-for="MonthlySalary" class="sw-input" type="number" id="salaryInput" />
+                                    </div>
+                                    <span asp-validation-for="MonthlySalary" class="sw-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="MonthlyExpenses" class="sw-label"></label>
+                                    <div class="sw-input-wrap">
+                                        <i class="bi bi-cart sw-input-icon"></i>
+                                        <input asp-for="MonthlyExpenses" class="sw-input" type="number" id="expensesInput" />
+                                    </div>
+                                    <span asp-validation-for="MonthlyExpenses" class="sw-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="ExistingSavings" class="sw-label"></label>
+                                    <div class="sw-input-wrap">
+                                        <i class="bi bi-piggy-bank sw-input-icon"></i>
+                                        <input asp-for="ExistingSavings" class="sw-input" type="number" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live affordability preview -->
+                        <div id="affordPreview" class="sw-afford-preview d-none mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <span id="affordText"></span>
+                        </div>
+
+                        <hr class="sw-divider my-4" />
+                        <h5 class="sw-section-label mb-3"><i class="bi bi-bullseye me-2"></i>Investment Goals & Risk</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="FinancialGoal" class="sw-label"></label>
+                                    <select asp-for="FinancialGoal" class="sw-select"
+                                            asp-items="Html.GetEnumSelectList<SalaryWise.Models.FinancialGoalType>()"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="sw-form-group">
+                                    <label asp-for="InvestmentHorizon" class="sw-label"></label>
+                                    <select asp-for="InvestmentHorizon" class="sw-select"
+                                            asp-items="Html.GetEnumSelectList<SalaryWise.Models.InvestmentHorizon>()"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="sw-form-group">
+                                    <label asp-for="RiskTolerance" class="sw-label"></label>
+                                    <select asp-for="RiskTolerance" class="sw-select"
+                                            asp-items="Html.GetEnumSelectList<SalaryWise.Models.RiskTolerance>()"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="sw-divider my-4" />
+                        <h5 class="sw-section-label mb-3"><i class="bi bi-sliders me-2"></i>Investment Percentage</h5>
+
+                        <div class="sw-slider-group">
+                            <div class="d-flex justify-content-between mb-2">
+                                <label asp-for="InvestmentPercentage" class="sw-label mb-0">How much of your salary to invest?</label>
+                                <span class="sw-slider-value">
+                                    <span id="pctDisplay">@Model.InvestmentPercentage</span>%
+                                    &nbsp;= ₹<span id="amtDisplay">0</span>
+                                </span>
+                            </div>
+                            <input asp-for="InvestmentPercentage" type="range" class="sw-slider" min="1" max="50" id="pctSlider"
+                                   oninput="updateSlider(this.value)" />
+                            <div class="d-flex justify-content-between sw-slider-labels">
+                                <span>1%</span><span>Conservative 10%</span><span>Moderate 20%</span><span>Aggressive 50%</span>
+                            </div>
+                            <span asp-validation-for="InvestmentPercentage" class="sw-validation"></span>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-3">
+                            <button type="submit" class="btn sw-btn-primary rounded-pill px-5">
+                                <i class="bi bi-magic me-2"></i>@(Model.PlanId.HasValue ? "Update Plan" : "Generate My Plan")
+                            </button>
+                            <a asp-controller="Dashboard" asp-action="Index" class="btn sw-btn-outline rounded-pill px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+    function updateSlider(val) {
+        document.getElementById('pctDisplay').textContent = val;
+        const salary = parseFloat(document.getElementById('salaryInput').value) || 0;
+        const amt = Math.round(salary * val / 100);
+        document.getElementById('amtDisplay').textContent = amt.toLocaleString('en-IN');
+        updateAfford(salary, parseFloat(document.getElementById('expensesInput').value) || 0, parseInt(val));
+    }
+    function updateAfford(salary, expenses, pct) {
+        const disposable = salary - expenses;
+        const invest = salary * pct / 100;
+        const el = document.getElementById('affordPreview');
+        const txt = document.getElementById('affordText');
+        if (salary <= 0) { el.classList.add('d-none'); return; }
+        el.classList.remove('d-none');
+        if (disposable <= 0) {
+            el.className = 'sw-afford-preview sw-afford-danger mt-2';
+            txt.textContent = 'Expenses exceed salary. Cannot invest.';
+        } else if (invest > disposable * 0.85) {
+            el.className = 'sw-afford-preview sw-afford-warning mt-2';
+            txt.textContent = `₹${invest.toLocaleString('en-IN')}/mo investment may be too aggressive. Disposable: ₹${disposable.toLocaleString('en-IN')}.`;
+        } else {
+            el.className = 'sw-afford-preview sw-afford-success mt-2';
+            txt.textContent = `Great! ₹${invest.toLocaleString('en-IN')}/mo leaves ₹${(disposable - invest).toLocaleString('en-IN')} after investing.`;
+        }
+    }
+    document.getElementById('salaryInput').addEventListener('input', () =>
+        updateSlider(document.getElementById('pctSlider').value));
+    document.getElementById('expensesInput').addEventListener('input', () =>
+        updateSlider(document.getElementById('pctSlider').value));
+    updateSlider(document.getElementById('pctSlider').value);
+</script>
+}

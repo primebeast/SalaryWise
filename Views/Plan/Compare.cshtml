@@ -1,0 +1,105 @@
+@model SalaryWise.ViewModels.ComparePlanViewModel
+@{ViewData["Title"] = "Compare Plans";}
+
+<div class="sw-page-header">
+    <div class="container">
+        <h1 class="sw-page-title">Compare Plans</h1>
+        <p class="sw-page-sub">Select two plans to compare side-by-side</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Plan selectors -->
+    <div class="sw-card mb-4">
+        <div class="sw-card-body">
+            <form method="get" asp-action="Compare" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="sw-label">Plan A</label>
+                    <select name="planAId" class="sw-select">
+                        <option value="">-- Select Plan --</option>
+                        @foreach (var p in Model.AllPlans)
+                        {
+                            if (Model.SelectedPlanAId == p.Id)
+                            {
+                                <option value="@p.Id" selected>@p.PlanName (@p.CreatedAt.ToString("MMM yyyy"))</option>
+                            }
+                            else
+                            {
+                                <option value="@p.Id">@p.PlanName (@p.CreatedAt.ToString("MMM yyyy"))</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="sw-label">Plan B</label>
+                    <select name="planBId" class="sw-select">
+                        <option value="">-- Select Plan --</option>
+                        @foreach (var p in Model.AllPlans)
+                        {
+                            if (Model.SelectedPlanBId == p.Id)
+                            {
+                                <option value="@p.Id" selected>@p.PlanName (@p.CreatedAt.ToString("MMM yyyy"))</option>
+                            }
+                            else
+                            {
+                                <option value="@p.Id">@p.PlanName (@p.CreatedAt.ToString("MMM yyyy"))</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn sw-btn-primary w-100 rounded-pill">Compare</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.PlanA != null && Model.PlanB != null)
+    {
+        <div class="row g-4">
+            @foreach (var (vm, label) in new[] { (Model.PlanA, "Plan A"), (Model.PlanB, "Plan B") })
+            {
+                var p   = vm.Plan;
+                var rec = vm.Recommendation;
+                var h   = vm.HealthScore;
+                <div class="col-lg-6">
+                    <div class="sw-card">
+                        <div class="sw-card-header">
+                            <h5 class="sw-card-title">@label: @p.PlanName</h5>
+                        </div>
+                        <div class="sw-card-body">
+                            <dl class="sw-dl">
+                                <dt>Monthly Salary</dt><dd>₹@p.MonthlySalary.ToString("N0")</dd>
+                                <dt>Investment</dt><dd class="text-success fw-600">₹@p.MonthlyInvestmentAmount.ToString("N0") (@p.InvestmentPercentage%)</dd>
+                                <dt>Disposable Income</dt><dd>₹@p.DisposableIncome.ToString("N0")</dd>
+                                <dt>Risk</dt><dd>@p.RiskTolerance</dd>
+                                <dt>Goal</dt><dd>@p.FinancialGoal</dd>
+                                <dt>Health Score</dt><dd><span class="fw-700 text-primary">@h.TotalScore/100 (@h.Grade)</span></dd>
+                                <dt>Safe Allocation</dt><dd>₹@rec.SafeTotal.ToString("N0") (@rec.SafePercent.ToString("F0")%)</dd>
+                                <dt>Medium Allocation</dt><dd>₹@rec.MediumTotal.ToString("N0") (@rec.MediumPercent.ToString("F0")%)</dd>
+                            </dl>
+                            <hr class="sw-divider" />
+                            <h6 class="sw-section-label mb-2">Projections</h6>
+                            @foreach (var proj in vm.Projections)
+                            {
+                                <div class="d-flex justify-content-between mb-1 small">
+                                    <span>@proj.Years Years</span>
+                                    <span class="fw-600 text-primary">₹@proj.EstimatedValue.ToString("N0")</span>
+                                    <span class="text-success">+₹@proj.EstimatedGains.ToString("N0")</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (Model.AllPlans.Count < 2)
+    {
+        <div class="sw-empty-state text-center py-5">
+            <div class="sw-empty-icon">📊</div>
+            <p class="opacity-60">Create at least 2 plans to compare them.</p>
+            <a asp-action="Create" class="btn sw-btn-primary rounded-pill px-4">Create Plan</a>
+        </div>
+    }
+</div>

@@ -1,0 +1,132 @@
+@model SalaryWise.ViewModels.ProfileViewModel
+@{ViewData["Title"] = "Edit Profile";}
+
+<div class="sw-page-header">
+    <div class="container">
+        <h1 class="sw-page-title">Edit Profile</h1>
+        <p class="sw-page-sub">Keep your financial details up to date for better recommendations</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="sw-card">
+                <div class="sw-card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert sw-alert-error mb-4"></div>
+
+                        <h5 class="sw-section-label mb-3"><i class="bi bi-person-fill me-2"></i>Personal</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="FullName" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-person sw-input-icon"></i><input asp-for="FullName" class="sw-input" /></div>
+                                    <span asp-validation-for="FullName" class="sw-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="MobileNumber" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-phone sw-input-icon"></i><input asp-for="MobileNumber" class="sw-input" /></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="DateOfBirth" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-calendar3 sw-input-icon"></i><input asp-for="DateOfBirth" class="sw-input" type="date" /></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="Occupation" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-briefcase sw-input-icon"></i><input asp-for="Occupation" class="sw-input" /></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="EmploymentType" class="sw-label"></label>
+                                    <select asp-for="EmploymentType" class="sw-select" asp-items="Html.GetEnumSelectList<SalaryWise.Models.EmploymentType>()"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="sw-form-group">
+                                    <label asp-for="City" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-geo-alt sw-input-icon"></i><input asp-for="City" class="sw-input" placeholder="e.g. Bangalore" /></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="sw-divider my-4" />
+                        <h5 class="sw-section-label mb-3"><i class="bi bi-currency-rupee me-2"></i>Financials</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="MonthlySalary" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-currency-rupee sw-input-icon"></i><input asp-for="MonthlySalary" class="sw-input" type="number" /></div>
+                                    <span asp-validation-for="MonthlySalary" class="sw-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="MonthlyExpenses" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-cart sw-input-icon"></i><input asp-for="MonthlyExpenses" class="sw-input" type="number" /></div>
+                                    <span asp-validation-for="MonthlyExpenses" class="sw-validation"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="ExistingSavings" class="sw-label"></label>
+                                    <div class="sw-input-wrap"><i class="bi bi-piggy-bank sw-input-icon"></i><input asp-for="ExistingSavings" class="sw-input" type="number" /></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="sw-divider my-4" />
+                        <h5 class="sw-section-label mb-3"><i class="bi bi-bullseye me-2"></i>Goals & Preferences</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="PrimaryGoal" class="sw-label"></label>
+                                    <select asp-for="PrimaryGoal" class="sw-select" asp-items="Html.GetEnumSelectList<SalaryWise.Models.FinancialGoalType>()"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="InvestmentHorizon" class="sw-label"></label>
+                                    <select asp-for="InvestmentHorizon" class="sw-select" asp-items="Html.GetEnumSelectList<SalaryWise.Models.InvestmentHorizon>()"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="sw-form-group">
+                                    <label asp-for="RiskPreference" class="sw-label"></label>
+                                    <select asp-for="RiskPreference" class="sw-select" asp-items="Html.GetEnumSelectList<SalaryWise.Models.RiskTolerance>()"></select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="sw-form-group">
+                                    <div class="d-flex justify-content-between">
+                                        <label asp-for="PreferredInvestmentPercentage" class="sw-label"></label>
+                                        <span class="fw-700 text-primary"><span id="ppctDisplay">@Model.PreferredInvestmentPercentage</span>%</span>
+                                    </div>
+                                    <input asp-for="PreferredInvestmentPercentage" type="range" class="sw-slider" min="1" max="50"
+                                           oninput="document.getElementById('ppctDisplay').textContent = this.value" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-3">
+                            <button type="submit" class="btn sw-btn-primary rounded-pill px-5">
+                                <i class="bi bi-save me-2"></i>Save Profile
+                            </button>
+                            <a asp-action="Index" class="btn sw-btn-outline rounded-pill px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} }

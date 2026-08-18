@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SalaryWise – Smart salary-based investment planning for Indian salaried employees. Get personalised investment recommendations, portfolio allocation, and wealth projections." />
+    <title>@ViewData["Title"] – SalaryWise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+</head>
+<body class="sw-body">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sw-navbar fixed-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand sw-brand" asp-controller="Home" asp-action="Index">
+                <span class="brand-icon">💰</span>
+                <span class="brand-text">Salary<span class="brand-accent">Wise</span></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <i class="bi bi-list text-white fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link sw-nav-link" asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-grid-1x2-fill me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sw-nav-link" asp-controller="Plan" asp-action="Create">
+                                <i class="bi bi-plus-circle-fill me-1"></i>New Plan
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sw-nav-link" asp-controller="Plan" asp-action="History">
+                                <i class="bi bi-clock-history me-1"></i>History
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link sw-nav-link" asp-controller="Profile" asp-action="Index">
+                                <i class="bi bi-person-circle me-1"></i>Profile
+                            </a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link sw-nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-primary btn-sm rounded-pill px-3 fw-600" asp-controller="Account" asp-action="Register">
+                                Get Started Free
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="sw-main">
+        @if (TempData["Success"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert sw-alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert sw-alert-error alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="sw-footer mt-5">
+        <div class="container text-center py-4">
+            <p class="mb-1 opacity-75">
+                <span class="fw-600">SalaryWise</span> &mdash; Educational investment planning tool for Indian salaried employees.
+            </p>
+            <p class="small opacity-50 mb-0">
+                ⚠️ Disclaimer: Recommendations are for educational purposes only and do not constitute professional financial advice. Consult a SEBI-registered financial advisor before investing.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

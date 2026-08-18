@@ -1,0 +1,182 @@
+@{
+    ViewData["Title"] = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Hero Section -->
+<section class="sw-hero">
+    <div class="sw-hero-bg"></div>
+    <div class="container position-relative">
+        <div class="row align-items-center min-vh-85 py-5">
+            <div class="col-lg-6 text-white">
+                <div class="badge sw-badge-hero mb-3">
+                    <i class="bi bi-stars me-1"></i> Smart Salary Planning
+                </div>
+                <h1 class="display-4 fw-800 lh-1 mb-4">
+                    Make Your Salary<br />
+                    <span class="text-gradient">Work Smarter</span>
+                </h1>
+                <p class="lead opacity-85 mb-5">
+                    SalaryWise helps you decide <strong>how much to invest</strong> and <strong>where to invest it</strong> — with personalized recommendations across PPF, Index Funds, Gold, Bonds, and more.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="Account" asp-action="Register" class="btn sw-btn-hero btn-lg rounded-pill px-5">
+                        <i class="bi bi-rocket-takeoff-fill me-2"></i>Start Planning Free
+                    </a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    </a>
+                </div>
+                <div class="d-flex gap-4 mt-5">
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">17+</div>
+                        <div class="hero-stat-lbl">Instruments</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">20yr</div>
+                        <div class="hero-stat-lbl">Projections</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">100%</div>
+                        <div class="hero-stat-lbl">Free & Private</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+                <div class="hero-card-stack">
+                    <div class="hero-card hc-1">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hc-icon hc-green"><i class="bi bi-graph-up-arrow"></i></div>
+                            <div>
+                                <div class="hc-label">Nifty 50 Index Fund</div>
+                                <div class="hc-value text-success">+12% expected p.a.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-card hc-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hc-icon hc-purple"><i class="bi bi-safe2-fill"></i></div>
+                            <div>
+                                <div class="hc-label">PPF</div>
+                                <div class="hc-value text-primary">7.1% guaranteed p.a.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-card hc-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="hc-icon hc-yellow"><i class="bi bi-currency-bitcoin"></i></div>
+                            <div>
+                                <div class="hc-label">Sovereign Gold Bond</div>
+                                <div class="hc-value" style="color:#f59e0b">8.5% inflation hedge</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-card hc-main">
+                        <div class="text-center">
+                            <div class="hc-main-label">₹15,000/month invested</div>
+                            <div class="hc-main-value">₹1.2 Cr <span class="text-success fs-6">in 20 years</span></div>
+                            <div class="progress mt-3" style="height:8px">
+                                <div class="progress-bar bg-success" style="width:60%"></div>
+                                <div class="progress-bar" style="width:40%;background:#f59e0b"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-white-50">Safe 60%</small>
+                                <small style="color:#f59e0b">Growth 40%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 mt-3">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="sw-section-badge">Simple Process</span>
+            <h2 class="sw-section-title">How SalaryWise Works</h2>
+            <p class="sw-section-sub">Three steps to a smarter investment plan</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="sw-feature-card text-center">
+                    <div class="sw-feature-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                        <i class="bi bi-person-fill-gear"></i>
+                    </div>
+                    <h4 class="sw-feature-title">1. Enter Your Profile</h4>
+                    <p class="sw-feature-desc">Share your salary, expenses, age, goals, and risk appetite. You choose how much to invest (1–50%).</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sw-feature-card text-center">
+                    <div class="sw-feature-icon" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">
+                        <i class="bi bi-calculator-fill"></i>
+                    </div>
+                    <h4 class="sw-feature-title">2. Get Analysis</h4>
+                    <p class="sw-feature-desc">We check affordability, calculate your disposable income, emergency fund gap, and financial health score.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sw-feature-card text-center">
+                    <div class="sw-feature-icon" style="background:linear-gradient(135deg,#10b981,#059669)">
+                        <i class="bi bi-pie-chart-fill"></i>
+                    </div>
+                    <h4 class="sw-feature-title">3. Receive Plan</h4>
+                    <p class="sw-feature-desc">Get a diversified portfolio across PPF, Index Funds, Gold, Bonds and more — with 5, 10 & 20-year projections.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Investment Instruments Preview -->
+<section class="py-5 sw-instruments-bg">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="sw-section-badge">Comprehensive Coverage</span>
+            <h2 class="sw-section-title">Investments We Cover</h2>
+        </div>
+        <div class="row g-3">
+            @foreach (var item in new[] {
+                ("bi-safe2-fill","PPF","7.1% p.a. Tax-Free","#6366f1"),
+                ("bi-bar-chart-fill","Nifty 50 Index","12% expected p.a.","#10b981"),
+                ("bi-gem","Gold ETF / SGB","8–8.5% + inflation hedge","#f59e0b"),
+                ("bi-bank","Govt Bonds","7.3% sovereign safety","#3b82f6"),
+                ("bi-arrow-repeat","Flexi-Cap Fund","12.5% dynamic equity","#ec4899"),
+                ("bi-droplet-fill","Liquid Fund","6.8% instant access","#14b8a6"),
+            })
+            {
+                <div class="col-md-4 col-6">
+                    <div class="sw-instrument-chip">
+                        <i class="bi @item.Item1 me-2" style="color:@item.Item4"></i>
+                        <div>
+                            <div class="fw-600 small">@item.Item2</div>
+                            <div class="opacity-60" style="font-size:0.75rem">@item.Item3</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="text-center mt-4">
+            <a asp-controller="Account" asp-action="Register" class="btn sw-btn-primary rounded-pill px-5">
+                See All 17+ Instruments <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="sw-cta-section py-5">
+    <div class="container text-center text-white">
+        <h2 class="display-6 fw-700 mb-3">Ready to invest smarter?</h2>
+        <p class="lead opacity-75 mb-4">Join thousands of salaried Indians building wealth systematically.</p>
+        <a asp-controller="Account" asp-action="Register" class="btn sw-btn-hero btn-lg rounded-pill px-5">
+            <i class="bi bi-rocket-takeoff-fill me-2"></i>Create My Free Plan
+        </a>
+        <div class="mt-3">
+            <small class="opacity-50">Demo account: demo@salarywise.in / Demo@123</small>
+        </div>
+    </div>
+</section>

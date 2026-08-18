@@ -1,0 +1,89 @@
+@model List<SalaryWise.Models.InvestmentPlan>
+@using SalaryWise.Models
+@{ViewData["Title"] = "My Investment Plans";}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="sw-page-title">My Investment Plans</h1>
+                <p class="sw-page-sub">Your complete investment plan history</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Compare" class="btn sw-btn-outline rounded-pill px-3">
+                    <i class="bi bi-columns-gap me-1"></i>Compare Plans
+                </a>
+                <a asp-action="Create" class="btn sw-btn-primary rounded-pill px-4">
+                    <i class="bi bi-plus-circle-fill me-1"></i>New Plan
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    @if (!Model.Any())
+    {
+        <div class="sw-empty-state text-center py-5">
+            <div class="sw-empty-icon">📋</div>
+            <h3 class="mt-3">No plans yet</h3>
+            <p class="opacity-60">Create your first investment plan to start building wealth.</p>
+            <a asp-action="Create" class="btn sw-btn-primary rounded-pill px-5 mt-2">Create First Plan</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var plan in Model)
+            {
+                <div class="col-lg-6">
+                    <div class="sw-plan-card @(plan.Status == PlanStatus.Active ? "sw-plan-active" : "")">
+                        <div class="sw-plan-card-header">
+                            <div>
+                                <h5 class="sw-plan-name">@plan.PlanName</h5>
+                                <span class="sw-badge-status @(plan.Status == PlanStatus.Active ? "sw-badge-active" : "sw-badge-archived")">@plan.Status</span>
+                            </div>
+                            <div class="sw-plan-score">@plan.HealthScore<span class="small opacity-50">/100</span></div>
+                        </div>
+                        <div class="sw-plan-stats">
+                            <div>
+                                <div class="sw-stat-val">₹@plan.MonthlySalary.ToString("N0")</div>
+                                <div class="sw-stat-lbl">Salary</div>
+                            </div>
+                            <div>
+                                <div class="sw-stat-val text-success">₹@plan.MonthlyInvestmentAmount.ToString("N0")</div>
+                                <div class="sw-stat-lbl">Investment</div>
+                            </div>
+                            <div>
+                                <div class="sw-stat-val">@plan.InvestmentPercentage%</div>
+                                <div class="sw-stat-lbl">Rate</div>
+                            </div>
+                            <div>
+                                <div class="sw-stat-val">@plan.RiskTolerance</div>
+                                <div class="sw-stat-lbl">Risk</div>
+                            </div>
+                        </div>
+                        <div class="sw-plan-footer">
+                            <small class="opacity-50">@plan.CreatedAt.ToString("dd MMM yyyy")</small>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Details" asp-route-id="@plan.Id" class="btn sw-btn-outline btn-sm rounded-pill px-3">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@plan.Id" class="btn sw-btn-outline btn-sm rounded-pill px-3">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </a>
+                                @if (plan.Status != PlanStatus.Active)
+                                {
+                                    <form asp-action="SetActive" asp-route-id="@plan.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn sw-btn-primary btn-sm rounded-pill px-3">Activate</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

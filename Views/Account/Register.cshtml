@@ -1,0 +1,68 @@
+@model SalaryWise.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="sw-auth-page">
+    <div class="sw-auth-card">
+        <div class="text-center mb-4">
+            <div class="sw-auth-logo">💰</div>
+            <h1 class="sw-auth-title">Join SalaryWise</h1>
+            <p class="sw-auth-sub">Start your investment journey today</p>
+        </div>
+
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert sw-alert-error mb-3"></div>
+
+            <div class="sw-form-group">
+                <label asp-for="FullName" class="sw-label"></label>
+                <div class="sw-input-wrap">
+                    <i class="bi bi-person sw-input-icon"></i>
+                    <input asp-for="FullName" class="sw-input" placeholder="Rahul Sharma" />
+                </div>
+                <span asp-validation-for="FullName" class="sw-validation"></span>
+            </div>
+
+            <div class="sw-form-group">
+                <label asp-for="Email" class="sw-label"></label>
+                <div class="sw-input-wrap">
+                    <i class="bi bi-envelope sw-input-icon"></i>
+                    <input asp-for="Email" class="sw-input" placeholder="you@example.com" />
+                </div>
+                <span asp-validation-for="Email" class="sw-validation"></span>
+            </div>
+
+            <div class="sw-form-group">
+                <label asp-for="Password" class="sw-label"></label>
+                <div class="sw-input-wrap">
+                    <i class="bi bi-lock sw-input-icon"></i>
+                    <input asp-for="Password" class="sw-input" placeholder="Min 6 chars, 1 uppercase, 1 special" />
+                </div>
+                <span asp-validation-for="Password" class="sw-validation"></span>
+            </div>
+
+            <div class="sw-form-group">
+                <label asp-for="ConfirmPassword" class="sw-label"></label>
+                <div class="sw-input-wrap">
+                    <i class="bi bi-lock-fill sw-input-icon"></i>
+                    <input asp-for="ConfirmPassword" class="sw-input" placeholder="Repeat password" />
+                </div>
+                <span asp-validation-for="ConfirmPassword" class="sw-validation"></span>
+            </div>
+
+            <button type="submit" class="btn sw-btn-primary w-100 mt-2 rounded-pill">
+                <i class="bi bi-rocket-takeoff-fill me-2"></i>Create Account
+            </button>
+        </form>
+
+        <hr class="sw-divider" />
+        <p class="text-center sw-auth-footer">
+            Already have an account?
+            <a asp-action="Login" class="sw-link fw-600">Login here</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
